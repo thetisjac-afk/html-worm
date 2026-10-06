@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chemical Worm</title>
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      font: 12px/1.4 ui-sans-serif, system-ui, sans-serif;
+      color: #ddd;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      cursor: crosshair;
+      touch-action: none; /* stop touch drags from scrolling or zooming the page */
+    }
+
+    #hint {
+      position: fixed;
+      left: 16px;
+      bottom: 14px;
+      color: rgba(255, 240, 225, 0.6);
+      pointer-events: none;
+      transition: opacity 2s;
+    }
+
+    #hint.faded {
+      opacity: 0;
+    }
+
+    #gear {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      width: 32px;
+      height: 32px;
+      border: 0;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.45);
+      color: #ddd;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    #panel {
+      position: fixed;
+      top: 50px;
+      right: 10px;
+      width: 270px;
+      max-width: calc(100vw - 20px);
+      max-height: calc(100vh - 64px);
+      overflow-y: auto;
+      padding: 6px 12px 12px;
+      box-sizing: border-box;
+      border-radius: 10px;
+      background: rgba(12, 10, 8, 0.85);
+      backdrop-filter: blur(6px);
+    }
+
+    #panel[hidden] {
+      display: none;
+    }
+
+    #panel h3 {
+      margin: 12px 0 4px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #c98;
+    }
+
+    #panel label {
+      display: grid;
+      grid-template-columns: 110px 1fr 38px;
+      align-items: center;
+      gap: 6px;
+      margin: 3px 0;
+    }
+
+    #panel output {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      color: #aaa;
+    }
+
+    #panel input[type="range"],
+    #panel select {
+      width: 100%;
+    }
+
+    #panel .buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    #panel button {
+      flex: 1;
+      padding: 5px;
+      border: 1px solid #554;
+      border-radius: 6px;
+      background: #2a231d;
+      color: #ddd;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+  <div id="hint">Move: scent &middot; Tap head/body/tail: poke &middot; L light mode &middot; D debug &middot; W wireframe &middot; P panel</div>
+  <script src="src/config.js"></script>
+  <script src="src/math.js"></script>
+  <script src="src/body.js"></script>
+  <script src="src/brain.js"></script>
+  <script src="src/render.js"></script>
+  <script src="src/panel.js"></script>
+  <script src="src/main.js"></script>
+</body>
+</html>
