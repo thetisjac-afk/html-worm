@@ -142,45 +142,113 @@ const DotStyles = {
     ctx.globalCompositeOperation = "source-over";
   },
 
-  // C: plexus / constellation. Scattered dots fill the body and connect to
-  // any neighbour close enough, like a living network.
-  plexus(ctx, worm) {
+  // C: plexus. Dots fill the body in loose lanes and link to any neighbour
+  // close enough, like a living network. It pulses:
+  //   - squeezed segments glow (the muscle wave)
+  //   - nerve impulses race head -> tail while it crawls
+  //   - a slow breathing glow while it rests
+  //   - a poke sends a shockwave of light out from the touch
+  plexus(ctx, worm, brain, time) {
     const n = worm.n;
-    const per = 5;
+    const lanes = [-0.92, -0.5, -0.12, 0.25, 0.62, 0.95];
+    const per = lanes.length;
     if (!this.seeds || this.seeds.length !== n * per) {
       this.seeds = [];
-      for (let k = 0; k < n * per; k += 1) {
-        this.seeds.push({ u: randRange(-0.95, 0.95), v: Math.random(), s: randRange(0.5, 1.4) });
+      for (let i = 0; i < n; i += 1) {
+        for (let k = 0; k < per; k += 1) {
+          const edge = k === 0 || k === per - 1;
+          this.seeds.push({
+            u: clamp(lanes[k] + (edge ? randRange(-0.04, 0.04) : randRange(-0.16, 0.16)), -1, 1),
+            v: randRange(0, 1),
+            size: randRange(0.6, 1.3),
+            phase: randRange(0, TAU),
+            rate: randRange(0.6, 1.6)
+          });
+        }
       }
     }
-    const pts = [];
+
+    // Per-node brightness from the body's state.
+    const glow = this._glow || (this._glow = []);
+    glow.length = n;
+    const moving = brain.activity;
+    const nervePhase = time * (0.5 + 0.9 * moving);
+    for (let i = 0; i < n; i += 1) {
+      const s = i / (n - 1);
+      const squeeze = Math.max(0, worm.contraction[Math.min(n - 2, i)]);
+      const f = ((nervePhase - s * 0.9) % 1 + 1) % 1;
+      const nerve = Math.exp(-(((f - 0.5) / 0.035) ** 2)) * (0.15 + 0.85 * moving);
+      const breathe = (1 - moving) * 0.18 * (0.5 + 0.5 * Math.sin(time * 1.6 - s * 2));
+      let shock = 0;
+      if (brain.shockNode >= 0 && brain.shock < 1.2) {
+        const front = brain.shock * 40; // nodes per second
+        const d = Math.abs(i - brain.shockNode) - front;
+        shock = Math.exp(-((d / 2.2) ** 2)) * (1 - brain.shock / 1.2);
+      }
+      const head = 0.25 * (1 - smoothstep(s / 0.12));
+      glow[i] = 0.32 + squeeze * 0.45 + nerve * 0.7 + breathe + shock * 1.2 + head;
+    }
+
+    const pts = this._pts || (this._pts = []);
+    pts.length = 0;
     for (let i = 0; i < n; i += 1) {
       const a = this.frame(i);
       const b = this.frame(Math.min(n - 1, i + 1));
       for (let k = 0; k < per; k += 1) {
         const seed = this.seeds[i * per + k];
         const v = i === n - 1 ? 0 : seed.v;
+        // Each dot drifts a little on its own, like a cell.
+        const u = seed.u + Math.sin(time * seed.rate + seed.phase) * 0.07;
+        const along = Math.cos(time * seed.rate * 0.8 + seed.phase) * 0.12;
         const cx = lerp(a.cx, b.cx, v);
         const cy = lerp(a.cy, b.cy, v);
         const hx = lerp(a.hx, b.hx, v);
         const hy = lerp(a.hy, b.hy, v);
-        pts.push({ x: cx + hx * seed.u, y: cy + hy * seed.u, i, s: seed.s, p: Mesh.pressure[i] });
+        const len = Math.hypot(hx, hy) || 1;
+        pts.push({
+          x: cx + hx * u - (hy / len) * along * worm.restLength,
+          y: cy + hy * u + (hx / len) * along * worm.restLength,
+          i,
+          size: seed.size,
+          g: lerp(glow[i], glow[Math.min(n - 1, i + 1)], v)
+        });
       }
     }
-    const reach = worm.restLength * 1.55;
+
+    const reach = worm.restLength * 1.5;
     const segs = [];
     for (let a = 0; a < pts.length; a += 1) {
       const pa = pts[a];
       for (let b = a + 1; b < pts.length && pts[b].i <= pa.i + 2; b += 1) {
         const pb = pts[b];
         const d = Math.hypot(pa.x - pb.x, pa.y - pb.y);
-        if (d < reach) segs.push([pa.x, pa.y, pb.x, pb.y, (1 - d / reach) * 0.75 + pa.p * 0.15]);
+        if (d < reach) {
+          const near = 1 - d / reach;
+          segs.push([pa.x, pa.y, pb.x, pb.y, near * near * (pa.g + pb.g) * 0.5]);
+        }
       }
     }
-    ctx.lineCap = "round";
-    this.strokeBuckets(ctx, segs, "200,230,255", 0.8);
+
+    // Feelers: the two chemical sensors, linked to the head.
+    if (brain.targetDistance < Infinity) {
+      const s = brain.sensors;
+      const h = pts[Math.floor(per / 2)];
+      const pulse = 0.25 + 0.2 * Math.sin(time * 6);
+      segs.push([h.x, h.y, s.lx, s.ly, pulse * (0.5 + s.li)]);
+      segs.push([h.x, h.y, s.rx, s.ry, pulse * (0.5 + s.ri)]);
+    }
+
     ctx.globalCompositeOperation = "lighter";
-    for (const p of pts) this.dot(ctx, p.x, p.y, (2.5 + p.p * 2.5) * p.s + 1.5, 0.45 + p.p * 0.35);
+    ctx.lineCap = "round";
+    this.strokeBuckets(ctx, segs, "150,205,255", 0.8);
+    for (const p of pts) {
+      this.dot(ctx, p.x, p.y, (2.2 + p.g * 3.2) * p.size, 0.25 + p.g * 0.6);
+    }
+    if (brain.targetDistance < Infinity) {
+      const s = brain.sensors;
+      this.dot(ctx, s.lx, s.ly, 3 + s.li * 4, 0.3 + s.li * 0.6);
+      this.dot(ctx, s.rx, s.ry, 3 + s.ri * 4, 0.3 + s.ri * 0.6);
+    }
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = "source-over";
   }

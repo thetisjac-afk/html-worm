@@ -40,7 +40,7 @@ const CONFIG = {
   arriveRadius: 40,      // close enough to the scent to stop and forage
 
   // --- View ----------------------------------------------------------------
-  style: "mesh",         // "mesh" (transparent dots and lines) or "organic" (fleshy)
+  style: "plexus",       // "plexus" (glowing dot network), "mesh", "lattice", "tube" or "organic"
   cursorMode: "food",    // "food" (attract) or "light" (worms hate light: repel)
   slime: true,           // draw the slime trail
   debug: false           // show grip, sensors and behaviour state

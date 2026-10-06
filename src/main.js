@@ -115,7 +115,7 @@ window.addEventListener("keydown", (event) => {
   if (key === "p") Panel.toggle();
   else if (key === "d") CONFIG.debug = !CONFIG.debug;
   else if (key === "w") {
-    const styles = ["mesh", "lattice", "tube", "plexus", "organic"];
+    const styles = ["plexus", "mesh", "lattice", "tube", "organic"];
     CONFIG.style = styles[(styles.indexOf(CONFIG.style) + 1) % styles.length];
   }
   else if (key === "l") CONFIG.cursorMode = CONFIG.cursorMode === "light" ? "food" : "light";

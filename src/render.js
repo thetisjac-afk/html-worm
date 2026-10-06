@@ -129,7 +129,7 @@ const Renderer = {
       Mesh.update(worm, brain, sim.frameDt);
       if (CONFIG.style === "lattice") DotStyles.lattice(ctx, worm);
       else if (CONFIG.style === "tube") DotStyles.tube(ctx, worm, sim.time);
-      else if (CONFIG.style === "plexus") DotStyles.plexus(ctx, worm);
+      else if (CONFIG.style === "plexus") DotStyles.plexus(ctx, worm, brain, sim.time);
       else Mesh.draw(ctx, worm);
     } else {
       if (this.soil) ctx.drawImage(this.soil, 0, 0, width, height);

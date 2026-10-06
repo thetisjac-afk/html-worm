@@ -37,7 +37,9 @@ function createBrain() {
     signal: 0,
     behind: false,
     sensors: { lx: 0, ly: 0, rx: 0, ry: 0, li: 0, ri: 0 },
-    targetDistance: Infinity
+    targetDistance: Infinity,
+    shock: 0,      // seconds since the last poke (drives the light shockwave)
+    shockNode: -1
   };
 }
 
@@ -196,6 +198,7 @@ const Brain = {
 
     brain.tone *= Math.exp(-3 * dt); // the withdraw case re-asserts it while the snap lasts
     brain.flinch *= Math.exp(-4 * dt);
+    if (brain.shockNode >= 0) brain.shock += dt;
     brain.boostTime = Math.max(0, brain.boostTime - dt);
     brain.freqBoost = 1 + 0.9 * smoothstep(brain.boostTime / 0.6);
     if (brain.boostTime > 0) brain.activity = Math.max(brain.activity, 0.95);
@@ -213,6 +216,9 @@ const Brain = {
       }
     }
     if (bestD > CONFIG.radius * 2.5 + 12) return false;
+
+    brain.shock = 0;
+    brain.shockNode = best;
 
     const s = best / (worm.n - 1);
     if (s < 0.3) {

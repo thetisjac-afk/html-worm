@@ -13,7 +13,7 @@ Open `index.html` in a browser. No build step.
 | Click/tap mid-body | Flinch: that part clenches and bends away |
 | `L` | Cursor becomes a light. Worms hate light, so it flees |
 | `D` | Debug view: grip (green dots), sensors, behaviour state, speed |
-| `W` | Switch between the mesh look (default: transparent dots and lines) and a fleshy look |
+| `W` | Cycle looks: plexus (default, glowing dot network), mesh (the original), lattice, tube, fleshy |
 | `P` or the gear | Live tuning panel |
 | Leave the window | Nothing to smell: it explores, and rests now and then |
 
@@ -71,6 +71,20 @@ Two traps this code avoids. The comments mark them:
   stale as the sweep moves nodes. Acting on stale angles made an early
   version explode.
 
+## How it glows (`src/dotstyles.js`, plexus)
+
+Dots sit in loose lanes inside the body and link to any neighbour within
+reach. Line brightness is the average glow of its two dots, so light seems
+to flow through the network. A dot's glow adds up:
+
+- **squeeze**: segments contracting in the muscle wave glow brighter
+- **nerve impulse**: a narrow bright band racing head to tail, faster when crawling
+- **breathing**: a slow swell while resting
+- **shockwave**: a ring of light spreading out from where you poked it
+
+Everything is drawn with additive blending (`lighter`), so where many lines
+cross the light piles up, like real glowing filaments.
+
 ## How it decides (`src/brain.js`)
 
 Two scent sensors sit either side of the head. The worm compares them:
@@ -96,7 +110,8 @@ src/config.js    every tunable number, with comments
 src/math.js      small helpers
 src/body.js      physics: muscles, grip, solver
 src/brain.js     senses and behaviours
-src/mesh.js      the mesh look: dots, skin, ribs, braces (the original renderer)
+src/mesh.js      the mesh look (the original renderer) and the soft outline every dot look builds on
+src/dotstyles.js plexus (pulsing dot network), lattice and tube looks
 src/render.js    picks the look, fleshy style, soil, slime trail, debug overlay
 src/panel.js     live tuning panel
 src/main.js      game loop and input
