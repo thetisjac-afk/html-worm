@@ -13,7 +13,7 @@ Open `index.html` in a browser. No build step.
 | Click/tap mid-body | Flinch: that part clenches and bends away |
 | `L` | Cursor becomes a light. Worms hate light, so it flees |
 | `D` | Debug view: grip (green dots), sensors, behaviour state, speed |
-| `W` | Wireframe look (the original line-art style) |
+| `W` | Switch between the mesh look (default: transparent dots and lines) and a fleshy look |
 | `P` or the gear | Live tuning panel |
 | Leave the window | Nothing to smell: it explores, and rests now and then |
 
@@ -35,8 +35,9 @@ there are about two waves on the body at once.
 **2. Squeezed segments grip.** A worm is a bag of fluid (a *hydrostatic
 skeleton*). Squeeze a segment short and it bulges fat, pressing its bristles
 (*setae*) into the soil. So `grip` follows `c`: the green clusters in debug
-view are the short, fat, anchored parts. The renderer draws the bulge too:
-width is `1 / sqrt(length)`, so volume stays roughly constant.
+view are the short, fat, anchored parts. Both looks draw the bulge from the
+real segment lengths: in the mesh, squeezed segments swell and their lines
+brighten.
 
 **3. The grip is a ratchet.** (`Worm.mobility`.) This is the single most important
 idea. Setae point backwards: sliding forwards is easy, sliding backwards is
@@ -95,7 +96,8 @@ src/config.js    every tunable number, with comments
 src/math.js      small helpers
 src/body.js      physics: muscles, grip, solver
 src/brain.js     senses and behaviours
-src/render.js    soil, worm, slime trail, wireframe, debug overlay
+src/mesh.js      the mesh look: dots, skin, ribs, braces (the original renderer)
+src/render.js    picks the look, fleshy style, soil, slime trail, debug overlay
 src/panel.js     live tuning panel
 src/main.js      game loop and input
 tests/smoke.mjs  headless browser checks

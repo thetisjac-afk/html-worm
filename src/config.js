@@ -3,8 +3,8 @@
 const CONFIG = {
   // --- Body -------------------------------------------------------------
   segments: 30,          // muscular segments (nodes = segments + 1)
-  segmentLength: 8,      // resting length of one segment
-  radius: 6.5,           // resting half-width of the body
+  segmentLength: 14,     // resting length of one segment
+  radius: 11,            // resting half-width of the body (organic style)
 
   // --- Muscles: the peristaltic wave -------------------------------------
   // Each segment squeezes and stretches on a sine wave whose phase shifts
@@ -30,17 +30,17 @@ const CONFIG = {
 
   // --- Senses & steering ---------------------------------------------------
   // Two chemical sensors either side of the head compare scent strength.
-  sensorDistance: 14,    // how far ahead of the head the sensors sit
-  sensorSpread: 9,       // how far apart (left/right) they are
-  scentFalloff: 55,      // scent decays as exp(-distance / falloff); smaller = sharper gradient
+  sensorDistance: 24,    // how far ahead of the head the sensors sit
+  sensorSpread: 16,      // how far apart (left/right) they are
+  scentFalloff: 80,      // scent decays as exp(-distance / falloff); smaller = sharper gradient
   steerGain: 3.2,        // how hard the worm turns toward the stronger side
   maxHeadBend: 1.6,      // total bend the head can make (radians, shared across the neck joints)
   headJoints: 3,         // joints behind the head that actively steer; the rest of the body just follows the path
   headSway: 0.32,        // side-to-side "casting" of the head while it searches
-  arriveRadius: 26,      // close enough to the scent to stop and forage
+  arriveRadius: 40,      // close enough to the scent to stop and forage
 
   // --- View ----------------------------------------------------------------
-  style: "organic",      // "organic" or "wireframe"
+  style: "mesh",         // "mesh" (transparent dots and lines) or "organic" (fleshy)
   cursorMode: "food",    // "food" (attract) or "light" (worms hate light: repel)
   slime: true,           // draw the slime trail
   debug: false           // show grip, sensors and behaviour state

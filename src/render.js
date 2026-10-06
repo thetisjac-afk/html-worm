@@ -65,7 +65,7 @@ const Renderer = {
   // Turn the spine into an outline. Width comes from the actual segment
   // length: a worm is a water-filled tube, so a squeezed segment gets fatter
   // (constant volume: width ~ 1 / sqrt(length)).
-  geometry(worm, widthScale = 1) {
+  geometry(worm) {
     const n = worm.n;
     const geo = this.geo && this.geo.n === n ? this.geo : (this.geo = {
       n,
@@ -85,7 +85,7 @@ const Renderer = {
       let profile = 0.5 + 0.5 * smoothstep(s / 0.09);                // pointed head
       profile *= 1 - 0.38 * smoothstep((s - 0.78) / 0.22);            // flattened tail
       profile *= 1 + 0.12 * Math.exp(-(((s - 0.3) / 0.05) ** 2));     // clitellum
-      geo.w[i] = CONFIG.radius * widthScale * profile * clamp(1 / Math.sqrt(ratio), 0.75, 1.5);
+      geo.w[i] = CONFIG.radius * profile * clamp(1 / Math.sqrt(ratio), 0.75, 1.5);
       geo.squeeze[i] = clamp((1 - ratio) / 0.35, -1, 1);
       const nx = -worm.ty[i];
       const ny = worm.tx[i];
@@ -120,13 +120,14 @@ const Renderer = {
 
   draw(ctx, sim) {
     const { worm, brain, input, width, height } = sim;
-    const wire = CONFIG.style === "wireframe";
-    const geo = this.geometry(worm, wire ? 1.8 : 1);
+    const geo = this.geometry(worm);
 
-    if (wire) {
+    if (CONFIG.style === "mesh") {
       ctx.fillStyle = "#000";
       ctx.fillRect(0, 0, width, height);
-      this.drawWireframe(ctx, worm, geo);
+      if (input.active && CONFIG.cursorMode === "light") this.drawCursorField(ctx, input);
+      Mesh.update(worm, brain, sim.frameDt);
+      Mesh.draw(ctx, worm);
     } else {
       if (this.soil) ctx.drawImage(this.soil, 0, 0, width, height);
       this.drawCursorField(ctx, input);
@@ -300,53 +301,6 @@ const Renderer = {
     ctx.lineWidth = 0.8;
     this.outlinePath(ctx, worm, geo);
     ctx.stroke();
-  },
-
-  // The original line-art look.
-  drawWireframe(ctx, worm, geo) {
-    const n = worm.n;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    for (let i = 0; i < n - 1; i += 1) {
-      const q = Math.max(0, (geo.squeeze[i] + geo.squeeze[i + 1]) * 0.5);
-      const hold = (worm.grip[i] + worm.grip[i + 1]) * 0.5;
-      ctx.strokeStyle = `rgba(255,255,255,${(0.58 + q * 0.14 + hold * 0.18).toFixed(3)})`;
-      ctx.lineWidth = 1.05 + q * 0.38;
-      ctx.beginPath();
-      ctx.moveTo(geo.lx[i], geo.ly[i]);
-      ctx.lineTo(geo.lx[i + 1], geo.ly[i + 1]);
-      ctx.moveTo(geo.rx[i], geo.ry[i]);
-      ctx.lineTo(geo.rx[i + 1], geo.ry[i + 1]);
-      ctx.stroke();
-
-      ctx.strokeStyle = `rgba(255,255,255,${(0.42 + q * 0.1).toFixed(3)})`;
-      ctx.lineWidth = 0.88;
-      ctx.beginPath();
-      ctx.moveTo(worm.x[i], worm.y[i]);
-      ctx.lineTo(worm.x[i + 1], worm.y[i + 1]);
-      ctx.stroke();
-
-      ctx.strokeStyle = `rgba(255,255,255,${(0.16 + q * 0.1).toFixed(3)})`;
-      ctx.lineWidth = 0.75;
-      ctx.beginPath();
-      ctx.moveTo(geo.lx[i], geo.ly[i]);
-      ctx.lineTo(geo.rx[i], geo.ry[i]);
-      if (i % 2 === 0) {
-        ctx.moveTo(geo.lx[i], geo.ly[i]);
-        ctx.lineTo(worm.x[i + 1], worm.y[i + 1]);
-      } else {
-        ctx.moveTo(geo.rx[i], geo.ry[i]);
-        ctx.lineTo(worm.x[i + 1], worm.y[i + 1]);
-      }
-      ctx.stroke();
-    }
-    ctx.fillStyle = "rgba(255,255,255,0.7)";
-    ctx.beginPath();
-    for (let i = 0; i < n; i += 2) {
-      ctx.moveTo(worm.x[i] + 1.25, worm.y[i]);
-      ctx.arc(worm.x[i], worm.y[i], 1.25, 0, TAU);
-    }
-    ctx.fill();
   },
 
   drawDebug(ctx, sim, geo) {

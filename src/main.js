@@ -17,6 +17,7 @@ const sim = {
   time: 0,
   speed: 0,
   fps: 60,
+  frameDt: 1 / 60,
   worm: null,
   brain: null,
   input
@@ -63,6 +64,7 @@ function frame(now) {
   const frameDt = Math.min((now - lastTime) / 1000, 0.1);
   lastTime = now;
   if (frameDt > 0) sim.fps = lerp(sim.fps, 1 / frameDt, 0.05);
+  sim.frameDt = frameDt;
   accumulator += frameDt;
   let steps = 0;
   while (accumulator >= FIXED_DT && steps < MAX_STEPS) {
@@ -112,7 +114,7 @@ window.addEventListener("keydown", (event) => {
   const key = event.key.toLowerCase();
   if (key === "p") Panel.toggle();
   else if (key === "d") CONFIG.debug = !CONFIG.debug;
-  else if (key === "w") CONFIG.style = CONFIG.style === "wireframe" ? "organic" : "wireframe";
+  else if (key === "w") CONFIG.style = CONFIG.style === "mesh" ? "organic" : "mesh";
   else if (key === "l") CONFIG.cursorMode = CONFIG.cursorMode === "light" ? "food" : "light";
   else return;
   Panel.sync();
@@ -123,6 +125,7 @@ window.addEventListener("resize", () => {
   const sy = window.innerHeight / (sim.height || 1);
   resize();
   sim.worm.scale(sx, sy);
+  Mesh.scale(sx, sy);
 });
 
 resize();
