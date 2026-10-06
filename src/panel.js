@@ -23,7 +23,7 @@ const PANEL_SPEC = [
   { key: "headJoints", min: 1, max: 10, step: 1 },
   { key: "headSway", min: 0, max: 1, step: 0.01 },
   { group: "View" },
-  { key: "style", options: ["mesh", "organic"] },
+  { key: "style", options: ["mesh", "lattice", "tube", "plexus", "organic"] },
   { key: "cursorMode", options: ["food", "light"] },
   { key: "slime", toggle: true },
   { key: "debug", toggle: true }

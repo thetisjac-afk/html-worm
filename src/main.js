@@ -114,7 +114,10 @@ window.addEventListener("keydown", (event) => {
   const key = event.key.toLowerCase();
   if (key === "p") Panel.toggle();
   else if (key === "d") CONFIG.debug = !CONFIG.debug;
-  else if (key === "w") CONFIG.style = CONFIG.style === "mesh" ? "organic" : "mesh";
+  else if (key === "w") {
+    const styles = ["mesh", "lattice", "tube", "plexus", "organic"];
+    CONFIG.style = styles[(styles.indexOf(CONFIG.style) + 1) % styles.length];
+  }
   else if (key === "l") CONFIG.cursorMode = CONFIG.cursorMode === "light" ? "food" : "light";
   else return;
   Panel.sync();

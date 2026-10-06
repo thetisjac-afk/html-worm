@@ -122,12 +122,15 @@ const Renderer = {
     const { worm, brain, input, width, height } = sim;
     const geo = this.geometry(worm);
 
-    if (CONFIG.style === "mesh") {
+    if (CONFIG.style !== "organic") {
       ctx.fillStyle = "#000";
       ctx.fillRect(0, 0, width, height);
       if (input.active && CONFIG.cursorMode === "light") this.drawCursorField(ctx, input);
       Mesh.update(worm, brain, sim.frameDt);
-      Mesh.draw(ctx, worm);
+      if (CONFIG.style === "lattice") DotStyles.lattice(ctx, worm);
+      else if (CONFIG.style === "tube") DotStyles.tube(ctx, worm, sim.time);
+      else if (CONFIG.style === "plexus") DotStyles.plexus(ctx, worm);
+      else Mesh.draw(ctx, worm);
     } else {
       if (this.soil) ctx.drawImage(this.soil, 0, 0, width, height);
       this.drawCursorField(ctx, input);
