@@ -89,8 +89,8 @@ const Panel = {
     reset.textContent = "Reset";
     reset.addEventListener("click", () => {
       Object.assign(CONFIG, DEFAULT_CONFIG);
+      onRebuild(); // may shrink sizes to fit the screen
       this.sync();
-      onRebuild();
     });
     const copy = document.createElement("button");
     copy.textContent = "Copy config";

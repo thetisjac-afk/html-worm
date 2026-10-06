@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Chemical Worm</title>
   <style>
     :root {
@@ -31,7 +31,8 @@
     #hint {
       position: fixed;
       left: 16px;
-      bottom: 14px;
+      right: 16px;
+      bottom: calc(14px + env(safe-area-inset-bottom, 0px));
       color: rgba(255, 240, 225, 0.6);
       pointer-events: none;
       transition: opacity 2s;
@@ -43,10 +44,10 @@
 
     #gear {
       position: fixed;
-      top: 10px;
+      top: calc(10px + env(safe-area-inset-top, 0px));
       right: 10px;
-      width: 32px;
-      height: 32px;
+      width: 40px;
+      height: 40px;
       border: 0;
       border-radius: 8px;
       background: rgba(0, 0, 0, 0.45);
@@ -57,7 +58,7 @@
 
     #panel {
       position: fixed;
-      top: 50px;
+      top: calc(58px + env(safe-area-inset-top, 0px));
       right: 10px;
       width: 270px;
       max-width: calc(100vw - 20px);

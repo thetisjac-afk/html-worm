@@ -34,9 +34,22 @@ function resize() {
   Renderer.resize(sim.width, sim.height, sim.dpr);
 }
 
+// Every size in CONFIG is in px, tuned for a laptop screen. On a small
+// screen (a phone) shrink them all together so the worm still fits. Only
+// applies while the sizes are untouched, so panel tweaks are kept.
+const SIZE_KEYS = ["segmentLength", "radius", "sensorDistance", "sensorSpread", "scentFalloff", "arriveRadius"];
+
+function fitToScreen() {
+  if (CONFIG.segmentLength !== DEFAULT_CONFIG.segmentLength) return;
+  const bodyLength = DEFAULT_CONFIG.segmentLength * DEFAULT_CONFIG.segments;
+  const fit = clamp((Math.min(sim.width, sim.height) * 0.75) / bodyLength, 0.5, 1);
+  for (const key of SIZE_KEYS) CONFIG[key] = DEFAULT_CONFIG[key] * fit;
+}
+
 function spawn() {
+  fitToScreen();
   const angle = sim.worm ? Math.atan2(sim.worm.ty[0], sim.worm.tx[0]) : randRange(-0.4, 0.4);
-  const x = sim.worm ? sim.worm.x[0] : sim.width * 0.5 + 120;
+  const x = sim.worm ? sim.worm.x[0] : sim.width * 0.5 + CONFIG.segmentLength * 8;
   const y = sim.worm ? sim.worm.y[0] : sim.height * 0.5;
   sim.worm = new Worm(x, y, angle);
   if (!sim.brain) sim.brain = createBrain();
@@ -134,5 +147,9 @@ window.addEventListener("resize", () => {
 resize();
 spawn();
 Panel.init(spawn);
-setTimeout(() => document.getElementById("hint").classList.add("faded"), 9000);
+const hint = document.getElementById("hint");
+if (matchMedia("(pointer: coarse)").matches) {
+  hint.textContent = "Drag: scent \u00b7 Tap the worm: poke \u00b7 \u2699 settings and looks";
+}
+setTimeout(() => hint && hint.classList.add("faded"), 9000);
 requestAnimationFrame(frame);
